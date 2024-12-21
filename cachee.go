@@ -58,13 +58,3 @@ func (c *BaseCachee) Clear(container ICacheContainer, param *Param) error {
 }
 
 func (c *BaseCachee) ClearAll() {}
-
-type ICalculator interface {
-	Create(ICacheContainer, *Param) (any, error)
-}
-
-type ICacheContainer interface {
-	CacheGetValue(key any, id any) (any, error)
-	CacheSetValue(key any, id any, value any) error
-	CacheClearValue(key any, id any) error
-}
