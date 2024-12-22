@@ -5,17 +5,17 @@ import (
 	"fmt"
 )
 
-type Cacher struct {
-	registed map[any]ICachee
+type Cacher[KeyType comparable, IdType comparable, ContainerType ICacheContainer[KeyType, IdType]] struct {
+	registed map[KeyType]ICachee[KeyType, IdType, ContainerType]
 }
 
-func NewCacher() *Cacher {
-	return &Cacher{
-		registed: make(map[any]ICachee),
+func NewCacher[ContainerType ICacheContainer[KeyType, IdType], KeyType comparable, IdType comparable]() *Cacher[KeyType, IdType, ContainerType] {
+	return &Cacher[KeyType, IdType, ContainerType]{
+		registed: make(map[KeyType]ICachee[KeyType, IdType, ContainerType]),
 	}
 }
 
-func (c *Cacher) Register(key any, cachee ICachee) {
+func (c *Cacher[KeyType, IdType, ContainerType]) Register(key KeyType, cachee ICachee[KeyType, IdType, ContainerType]) {
 	if _, ok := c.registed[key]; ok {
 		panic(fmt.Sprintf("cacher register, key conflicted: %v", key))
 	}
@@ -23,7 +23,7 @@ func (c *Cacher) Register(key any, cachee ICachee) {
 	c.registed[key] = cachee
 }
 
-func (c *Cacher) Get(container ICacheContainer, key any, param ...*Param) (any, error) {
+func (c *Cacher[KeyType, IdType, ContainerType]) Get(container ContainerType, key KeyType, param ...*Param) (any, error) {
 	var p *Param
 	if len(param) > 0 {
 		p = param[0]
@@ -39,7 +39,7 @@ func (c *Cacher) Get(container ICacheContainer, key any, param ...*Param) (any, 
 	return c.Update(container, key, p)
 }
 
-func (c *Cacher) Try(container ICacheContainer, key any, param ...*Param) (any, error) {
+func (c *Cacher[KeyType, IdType, ContainerType]) Try(container ContainerType, key KeyType, param ...*Param) (any, error) {
 	var p *Param
 	if len(param) > 0 {
 		p = param[0]
@@ -51,7 +51,7 @@ func (c *Cacher) Try(container ICacheContainer, key any, param ...*Param) (any, 
 	return cachee.Get(container, p)
 }
 
-func (c *Cacher) Update(container ICacheContainer, key any, param ...*Param) (any, error) {
+func (c *Cacher[KeyType, IdType, ContainerType]) Update(container ContainerType, key KeyType, param ...*Param) (any, error) {
 	var p *Param
 	if len(param) > 0 {
 		p = param[0]
@@ -72,7 +72,7 @@ func (c *Cacher) Update(container ICacheContainer, key any, param ...*Param) (an
 	return val, nil
 }
 
-func (c *Cacher) Clear(container ICacheContainer, key any, param ...*Param) (any, error) {
+func (c *Cacher[KeyType, IdType, ContainerType]) Clear(container ContainerType, key KeyType, param ...*Param) (any, error) {
 	var p *Param
 	if len(param) > 0 {
 		p = param[0]
@@ -92,5 +92,5 @@ func (c *Cacher) Clear(container ICacheContainer, key any, param ...*Param) (any
 	return oldVal, nil
 }
 
-func (c *Cacher) ClearAll() {
+func (c *Cacher[KeyType, IdType, ContainerType]) ClearAll() {
 }

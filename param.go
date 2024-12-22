@@ -28,9 +28,6 @@ func (p *Param) SetExtra(k, v any) *Param {
 }
 
 func (p *Param) Id() any {
-	if p.id == nil {
-		return 0
-	}
 	return p.id
 }
 

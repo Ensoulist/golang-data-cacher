@@ -1,60 +1,77 @@
 package datacacher
 
-type ICachee interface {
-	Key() any
-	SetKey(any)
+import "fmt"
 
-	Get(ICacheContainer, *Param) (any, error)
-	Set(ICacheContainer, any, *Param) error
+type ICachee[KeyType comparable, IdType comparable, ContainerType ICacheContainer[KeyType, IdType]] interface {
+	Key() KeyType
+	SetKey(KeyType)
 
-	Create(ICacheContainer, *Param) (any, error)
+	Get(ContainerType, *Param) (any, error)
+	Set(ContainerType, any, *Param) error
 
-	Clear(ICacheContainer, *Param) error
+	Create(ContainerType, *Param) (any, error)
+
+	Clear(ContainerType, *Param) error
 	ClearAll()
 }
 
-type BaseCachee struct {
-	ICalculator
+type BaseCachee[KeyType comparable, IdType comparable, ContainerType ICacheContainer[KeyType, IdType]] struct {
+	ICalculator[ContainerType, KeyType, IdType]
+	key KeyType
 }
 
-func NewBaseCachee(calculator ICalculator) *BaseCachee {
-	return &BaseCachee{
+func NewBaseCachee[KeyType comparable, IdType comparable, ContainerType ICacheContainer[KeyType, IdType]](calculator ICalculator[ContainerType, KeyType, IdType]) *BaseCachee[KeyType, IdType, ContainerType] {
+	return &BaseCachee[KeyType, IdType, ContainerType]{
 		ICalculator: calculator,
 	}
 }
 
-func (c *BaseCachee) Key() any {
-	return c
+func (c *BaseCachee[KeyType, IdType, ContainerType]) Key() KeyType {
+	return c.key
 }
 
-func (c *BaseCachee) SetKey(key any) {
+func (c *BaseCachee[KeyType, IdType, ContainerType]) SetKey(key KeyType) {
+	c.key = key
 }
 
-func (c *BaseCachee) Get(container ICacheContainer, param *Param) (any, error) {
+func (c *BaseCachee[KeyType, IdType, ContainerType]) Get(container ContainerType, param *Param) (any, error) {
 	key := c.Key()
-	var id any = 0
+	var id IdType
 	if param != nil {
-		id = param.Id()
+		id = getIdFromParam[IdType](param)
 	}
 	return container.CacheGetValue(key, id)
 }
 
-func (c *BaseCachee) Set(container ICacheContainer, val any, param *Param) error {
+func (c *BaseCachee[KeyType, IdType, ContainerType]) Set(container ContainerType, val any, param *Param) error {
 	key := c.Key()
-	var id any = 0
+	var id IdType
 	if param != nil {
-		id = param.Id()
+		id = getIdFromParam[IdType](param)
 	}
 	return container.CacheSetValue(key, id, val)
 }
 
-func (c *BaseCachee) Clear(container ICacheContainer, param *Param) error {
+func (c *BaseCachee[KeyType, IdType, ContainerType]) Clear(container ContainerType, param *Param) error {
 	key := c.Key()
-	var id any = 0
+	var id IdType
 	if param != nil {
-		id = param.Id()
+		id = getIdFromParam[IdType](param)
 	}
 	return container.CacheClearValue(key, id)
 }
 
-func (c *BaseCachee) ClearAll() {}
+func (c *BaseCachee[KeyType, IdType, ContainerType]) ClearAll() {}
+
+func getIdFromParam[IdType comparable](param *Param) IdType {
+	var id IdType
+	if param.Id() == nil {
+		return id
+	}
+	var ok bool
+	id, ok = param.Id().(IdType)
+	if !ok {
+		panic(fmt.Sprintf("invalid id type, should be castable to %T", id))
+	}
+	return id
+}

@@ -1,5 +1,5 @@
 package datacacher
 
-type ICalculator interface {
-	Create(ICacheContainer, *Param) (any, error)
+type ICalculator[ContainerType ICacheContainer[KeyType, IdType], KeyType comparable, IdType comparable] interface {
+	Create(ContainerType, *Param) (any, error)
 }
