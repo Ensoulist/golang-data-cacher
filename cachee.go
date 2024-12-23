@@ -71,7 +71,7 @@ func getIdFromParam[IdType comparable](param *Param) IdType {
 	var ok bool
 	id, ok = param.Id().(IdType)
 	if !ok {
-		panic(fmt.Sprintf("invalid id type, should be castable to %T", id))
+		panic(fmt.Sprintf("invalid id type in param, should be castable to %T, now is: %T", id, param.Id()))
 	}
 	return id
 }
