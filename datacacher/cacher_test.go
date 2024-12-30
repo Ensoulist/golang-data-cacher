@@ -3,6 +3,7 @@ package datacacher
 import (
 	"fmt"
 	"testing"
+	"time"
 )
 
 type testContainer struct {
@@ -117,4 +118,44 @@ func TestClearValue(t *testing.T) {
 	val, err = cacher.Try(testC, CACHER_KEY_GET_NUMBER,
 		NewParam().SetId(10086).SetExtra("key", 100))
 	fmt.Println("4. TRY NUMBER", val, err)
+}
+
+type timeoutGet struct {
+}
+
+func (c *timeoutGet) Create(container *testContainer, param *Param) (any, error) {
+	fmt.Println("timeout get, create")
+	id := param.Id().(int)
+	key := param.GetExtra("key").(int)
+	return id + key, nil
+}
+
+func TestTimeout(t *testing.T) {
+	testC, cacher := prepare()
+	cacher.Register("timeout_get", WithTimeout(NewBaseCachee(&timeoutGet{}), time.Second*2))
+
+	val, err := cacher.Get(testC, "timeout_get",
+		NewParam().SetId(100).SetExtra("key", 1000))
+	fmt.Println("1. GET NUMBER", val, err)
+	if val != 1100 {
+		t.Errorf("val should be 1100, but %v", val)
+	}
+
+	time.Sleep(time.Second)
+
+	val, err = cacher.Get(testC, "timeout_get",
+		NewParam().SetId(100).SetExtra("key", 2000))
+	fmt.Println("2. GET NUMBER", val, err)
+	if val != 1100 {
+		t.Errorf("val should be 1100, but %v", val)
+	}
+
+	time.Sleep(time.Second)
+
+	val, err = cacher.Get(testC, "timeout_get",
+		NewParam().SetId(100).SetExtra("key", 2000))
+	fmt.Println("3. GET NUMBER", val, err)
+	if val != 2100 {
+		t.Errorf("val should be 2100, but %v", val)
+	}
 }
