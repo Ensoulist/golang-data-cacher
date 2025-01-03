@@ -159,3 +159,30 @@ func TestTimeout(t *testing.T) {
 		t.Errorf("val should be 2100, but %v", val)
 	}
 }
+
+func TestClearAll(t *testing.T) {
+	testC, cacher := prepare()
+
+	val, err := cacher.Get(testC, CACHER_KEY_GET_NUMBER,
+		NewParam().SetId(10086).SetExtra("key", 100))
+	fmt.Println("1. GET NUMBER", val, err)
+	val, err = cacher.Get(testC, CACHER_KEY_GET_NUMBER,
+		NewParam().SetId(10010).SetExtra("key", 200))
+	fmt.Println("2. GET NUMBER", val, err)
+
+	val, err = cacher.Get(testC, CACHER_KEY_GET_NUMBER,
+		NewParam().SetId(10086).SetExtra("key", 300))
+	fmt.Println("3. GET NUMBER", val, err)
+	val, err = cacher.Get(testC, CACHER_KEY_GET_NUMBER,
+		NewParam().SetId(10010).SetExtra("key", 400))
+	fmt.Println("4. GET NUMBER", val, err)
+
+	cacher.ClearAll(testC, CACHER_KEY_GET_NUMBER)
+
+	val, err = cacher.Get(testC, CACHER_KEY_GET_NUMBER,
+		NewParam().SetId(10086).SetExtra("key", 500))
+	fmt.Println("3. GET NUMBER", val, err)
+	val, err = cacher.Get(testC, CACHER_KEY_GET_NUMBER,
+		NewParam().SetId(10010).SetExtra("key", 600))
+	fmt.Println("4. GET NUMBER", val, err)
+}

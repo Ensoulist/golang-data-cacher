@@ -12,7 +12,7 @@ type ICachee[KeyType comparable, IdType comparable, ContainerType ICacheContaine
 	Create(ContainerType, *Param) (any, error)
 
 	Clear(ContainerType, *Param) error
-	ClearAll()
+	ClearAll(ContainerType) error
 }
 
 type BaseCachee[KeyType comparable, IdType comparable, ContainerType ICacheContainer[KeyType, IdType]] struct {
@@ -61,7 +61,10 @@ func (c *BaseCachee[KeyType, IdType, ContainerType]) Clear(container ContainerTy
 	return container.CacheClearValue(key, id)
 }
 
-func (c *BaseCachee[KeyType, IdType, ContainerType]) ClearAll() {}
+func (c *BaseCachee[KeyType, IdType, ContainerType]) ClearAll(container ContainerType) error {
+	key := c.Key()
+	return container.CacheClearAll(key)
+}
 
 func getIdFromParam[IdType comparable](param *Param) IdType {
 	var id IdType

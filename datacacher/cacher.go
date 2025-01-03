@@ -92,5 +92,10 @@ func (c *Cacher[KeyType, IdType, ContainerType]) Clear(container ContainerType, 
 	return oldVal, nil
 }
 
-func (c *Cacher[KeyType, IdType, ContainerType]) ClearAll() {
+func (c *Cacher[KeyType, IdType, ContainerType]) ClearAll(container ContainerType, key KeyType) error {
+	cachee, ok := c.registed[key]
+	if !ok {
+		return errors.New("clear all, cacher not found")
+	}
+	return cachee.ClearAll(container)
 }

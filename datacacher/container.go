@@ -4,6 +4,7 @@ type ICacheContainer[KeyType comparable, IdType comparable] interface {
 	CacheGetValue(key KeyType, id IdType) (any, error)
 	CacheSetValue(key KeyType, id IdType, value any) error
 	CacheClearValue(key KeyType, id IdType) error
+	CacheClearAll(key KeyType) error
 }
 
 type MapContainer[KeyType comparable, IdType comparable] struct {
@@ -39,5 +40,10 @@ func (c *MapContainer[KeyType, IdType]) CacheClearValue(key KeyType, id IdType) 
 	if len(c.m[key]) == 0 {
 		delete(c.m, key)
 	}
+	return nil
+}
+
+func (c *MapContainer[KeyType, IdType]) CacheClearAll(key KeyType) error {
+	delete(c.m, key)
 	return nil
 }
