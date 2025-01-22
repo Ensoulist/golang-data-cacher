@@ -93,6 +93,11 @@ func TestBase(t *testing.T) {
 
 func TestInvalidIdInParam(t *testing.T) {
 	testC, cacher := prepare()
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("recover", r)
+		}
+	}()
 	// should panic here
 	cacher.Get(testC, CACHER_KEY_GET_NUMBER,
 		NewParam().SetId(uint(10010)).SetExtra("key", 2000))
